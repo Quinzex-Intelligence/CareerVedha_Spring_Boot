@@ -125,9 +125,6 @@ public class RegistrationLogin implements IRegistrationLogin {
         LmsLogin user = loginRepo
                 .findByEmailWithRoleAndPermissions(loginResponse.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-
-
         if(!Boolean.TRUE.equals(user.getRole().getRoleStatus())){
             throw new RuntimeException("Your roles status is inactive please try again");
         }
@@ -194,7 +191,7 @@ public class RegistrationLogin implements IRegistrationLogin {
     @Override
     public LoginResponse refresh(String refreshToken, HttpServletResponse response) {
         RefreshTokenData data = irefreshTokenService.validate(refreshToken);
-        LmsLogin user = loginRepo.findByEmail(data.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
+        LmsLogin user = loginRepo.findByEmailWithRoleAndPermissions(data.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
         if(!Boolean.TRUE.equals(user.getRole().getRoleStatus())){
             throw new RuntimeException("Your roles status is inactive please try again");
         }
