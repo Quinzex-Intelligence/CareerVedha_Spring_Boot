@@ -10,6 +10,9 @@ import java.util.List;
 public class ClassHierarchyDTO {
     private Long id;
     private String name;
-    private String board;
-    private List<SubjectDTO> subjects;
+    private String slug;
+    private Integer rank;
+    private Integer depth;
+
+    private List<SubCategoryDTO> sub_categories;
 }

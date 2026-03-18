@@ -1,182 +1,153 @@
 package com.quinzex.service;
 
-import com.quinzex.dto.*;
-import com.quinzex.entity.Questions;
-import com.quinzex.repository.QuestionsRepo;
-import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.interceptor.SimpleKey;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+
+
 
 @Service
-public class ExamService implements IExamService {
+public class EmailService implements IemailService {
 
-    private final QuestionsRepo questionsRepo;
-    private final CacheManager cacheManager;
-    private static final Logger log = LoggerFactory.getLogger(ExamService.class);
+    private final IotpService iotpService;
+    private final SpringTemplateEngine templateEngine;
+    private final JavaMailSender javaMailSender;
+    @Value("${spring.mail.username}")
+    private String fromEmail;
 
-    public ExamService(QuestionsRepo questionsRepo, CacheManager cacheManager) {
-        this.questionsRepo = questionsRepo;
-        this.cacheManager = cacheManager;
+    public EmailService(IotpService iotpService,JavaMailSender javaMailSender,SpringTemplateEngine templateEngine){
+        this.iotpService=iotpService;
+        this.javaMailSender=javaMailSender;
+        this.templateEngine=templateEngine;
     }
 
-
+    @Async
     @Override
-    @Transactional
-    public String createQuestion(List<CreateQuestion> createQuestions) {
+    public void sendEmail(String email,String otp) {
 
-        List<Questions> questionsList = createQuestions.stream().map(question->{
-            Questions questions = new Questions();
-            questions.setQuestion(question.getQuestion());
-            questions.setOpt1(question.getOption1());
-            questions.setOpt2(question.getOption2());
-            questions.setOpt3(question.getOption3());
-            questions.setOpt4(question.getOption4());
-            questions.setCorrectOption(question.getCorrectAnswer().toUpperCase());
-            questions.setCategory(question.getCategory());
-            questions.setChapterId(question.getChapterId());
-            return questions;
-        }).toList();
 
-        questionsRepo.saveAll(questionsList);
-        evictCategoriesCacheSafely();
-        return questionsList.size()+" questions added successfully";
+        Context context = new Context();
+        context.setVariable("otp", otp);
+        try{
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(message,true,"UTF-8");
+            messageHelper.setFrom(fromEmail);
+            messageHelper.setTo(email);
+            messageHelper.setSubject("Verify your Career Vedha Registration");
+            messageHelper.setText(
+                    templateEngine.process("otp-register", context),
+                    true
+            );
+
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("OTP email sending failed", e);
+        }
+    }
+    @Async
+    @Override
+    public void sendLoginEmail(String email) {
+        String otp =    iotpService.generateLoginOtp(email);
+        Context context = new Context();
+        context.setVariable("otp", otp);
+        try{
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(message,true,"UTF-8");
+            messageHelper.setFrom(fromEmail);
+            messageHelper.setTo(email);
+            messageHelper.setSubject("Verify your Career Vedha login");
+            messageHelper.setText(
+                    templateEngine.process("otp-verify", context),
+                    true
+            );
+
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("OTP email sending failed", e);
+        }
+    }
+    @Async
+    @Override
+    public void sendSuspeciousEmail(String email) {
+
+        try{
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message,true,"UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(email);
+            helper.setSubject("Suspicious Login Alert – Career Vedha");
+            Context context = new Context();
+            String htmlContent = templateEngine.process("suspicious-login",context);
+            helper.setText(htmlContent,true);
+            javaMailSender.send(message);
+        }catch (MessagingException e){
+            throw new RuntimeException("Email Sending failed",e);
+        }
 
     }
 
-    private void evictCategoriesCacheSafely() {
-        Cache cache = cacheManager.getCache("categories");
-        if (cache == null) {
-            return;
-        }
+    @Async
+    @Override
+    public void sendApprovalEmail(String email, String role) {
+
         try {
-            cache.evict("all");
-            // Backward compatibility with entries cached before explicit key was set.
-            cache.evict(SimpleKey.EMPTY);
-        } catch (RuntimeException ex) {
-            log.warn("Categories cache eviction failed; continuing request flow.", ex);
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message,true,"UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(email);
+            helper.setSubject("Role Approved – Career Vedha");
+            Context context = new Context();
+            context.setVariable("role",role);
+            String htmlContent = templateEngine.process("role-approved",context);
+            helper.setText(htmlContent,true);
+            javaMailSender.send(message);
+        }catch (MessagingException  e){
+            throw new RuntimeException("Email Sending Failed ",e);
+        }
+    }
+    @Async
+    @Override
+    public void sendRejectionEmail(String email, String role, String reason) {
+        try{
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message,true,"UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(email);
+            helper.setSubject("Role Request Rejected – Career Vedha");
+            Context context = new Context();
+            context.setVariable("role",role);
+            context.setVariable(
+                    "reason",
+                    reason != null ? reason : "Not specified"
+            );
+            String htmlContent= templateEngine.process("role-rejected",context);
+            helper.setText(htmlContent,true);
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Email Sending Failed",e);
         }
     }
 
+    @Async
     @Override
-    public ScoreWithAnswers getScore(List<AnswerRequest> answers) {
-
-        if (answers == null || answers.isEmpty()) {
-            return new ScoreWithAnswers(0, List.of());
+    public void sendHtmlEmail(String to, String subject, String htmlContent) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message,true,"UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent,true);
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        List<Long> questionIds = answers
-                .stream()
-                .map(AnswerRequest::getQuestionId).distinct()
-                .toList();
-        Map<Long, String> answerMap = answers.stream()
-                .collect(Collectors.toMap(
-                        AnswerRequest::getQuestionId,
-                        a -> a.getSelectedOpt().toUpperCase()));
-        List<Questions> questions = questionsRepo.findAllByIdIn(questionIds);
-
-        long score = questions.stream()
-                .filter(q -> answerMap.containsKey(q.getId()) &&
-                        q.getCorrectOption().equalsIgnoreCase(
-                                answerMap.get(q.getId())))
-                .count();
-        List<CorrectOptionResponse> correctOptionResponses = questions.stream()
-                .map(q -> new CorrectOptionResponse(q.getId(), q.getCorrectOption())).toList();
-
-        return new ScoreWithAnswers(score, correctOptionResponses);
-    }
-
-    @Transactional
-    @Override
-    public String editQuestion(Long id, CreateQuestion createQuestion) {
-        Questions questions = questionsRepo.findById(id).orElseThrow(() -> new RuntimeException("Question Not Found"));
-        questions.setQuestion(createQuestion.getQuestion());
-        questions.setOpt1(createQuestion.getOption1());
-        questions.setOpt2(createQuestion.getOption2());
-        questions.setOpt3(createQuestion.getOption3());
-        questions.setOpt4(createQuestion.getOption4());
-        questions.setCorrectOption(createQuestion.getCorrectAnswer().toUpperCase());
-        questions.setCategory(createQuestion.getCategory());
-        questions.setChapterId(createQuestion.getChapterId());
-        questionsRepo.save(questions);
-        return "Question Edited Successfully";
-
-    }
-
-    @Transactional
-    @Override
-    public String deleteQuestion(List<Long> ids) {
-      if(ids == null || ids.isEmpty()) {
-          throw new RuntimeException("No Questions ids provided");
-      }
-      List<Questions> existingQuestions = questionsRepo.findAllById(ids);
-      if(existingQuestions.isEmpty()) {
-          throw new RuntimeException("Questions not found");
-      }
-      questionsRepo.deleteAll(existingQuestions);
-      return  existingQuestions.size()+ " Questions Deleted Successfully";
-    }
-    @Override
-    public List<?> getRandomQuestionsByCategory(String category,int limit) {
-        boolean includeAnswers = hasGetAnswersAuthority();
-        if(!includeAnswers) {
-            return questionsRepo.findRandomByCategory(category,limit).stream().map(this::mapToQuestionResponse).toList();
-        }else{
-            return questionsRepo.findRandomByCategory(category,limit).stream().map(this::mapToQuestionsWithAnswerResponse).toList();
-        }
-
-    }
-    @Override
-    public List<?> getRandomQuestionsByChapterID(Long chapterId, int limit) {
-      boolean includeAnswers = hasGetAnswersAuthority();
-      if(!includeAnswers) {
-          return questionsRepo.findRandomByChapterId(chapterId,limit).stream().map(this::mapToQuestionResponse).toList();
-      }else{
-          return questionsRepo.findRandomByChapterId(chapterId,limit).stream().map(this::mapToQuestionsWithAnswerResponse).toList();
-      }
-    }
-
-    private QuestionsResponse mapToQuestionResponse(Questions questions) {
-        return new QuestionsResponse(questions.getId(),questions.getQuestion(),questions.getOpt1(),questions.getOpt2(),questions.getOpt3(),questions.getOpt4(),questions.getCategory(),questions.getChapterId());
-    }
-    private QuestionsWithAnswerResponse mapToQuestionsWithAnswerResponse(Questions questionsResponse) {
-        return new QuestionsWithAnswerResponse(questionsResponse.getId(),
-                questionsResponse.getQuestion(),
-                questionsResponse.getOpt1(),
-                questionsResponse.getOpt2(),
-                questionsResponse.getOpt3(),
-                questionsResponse.getOpt4(),
-                questionsResponse.getCorrectOption(),
-                questionsResponse.getCategory(),
-                questionsResponse.getChapterId()
-
-        );
-
-    }
-
-    @Override
-   @Cacheable(value = "categories", key = "'all'")
-    public List<String> getAllExamCategories(){
-
-        return questionsRepo.findDistinctCategories();
-    }
-
-    private boolean hasGetAnswersAuthority(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return  authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("GET_ANSWERS"));
     }
 }
