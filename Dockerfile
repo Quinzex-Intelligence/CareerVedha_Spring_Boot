@@ -20,6 +20,3 @@ ENV JAVA_OPTS="-Xms1g -Xmx2g"
 EXPOSE 8080
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
-
-
-
