@@ -13,6 +13,6 @@ import java.util.List;
 )
 public interface AcademicsFeignClient {
 
-    @GetMapping("/api/django/academics/hierarchy/")
+    @GetMapping("/api/django/taxonomy/academics/levels/")
     List<ClassHierarchyDTO> getHierarchy();
-}
+}//end
