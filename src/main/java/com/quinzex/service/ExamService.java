@@ -32,6 +32,7 @@ public class ExamService implements IExamService {
             questions.setCorrectOption(question.getCorrectAnswer().toUpperCase());
             questions.setCategory(question.getCategory());
             questions.setChapterId(question.getChapterId());
+
             return questions;
         }).toList();
 
@@ -125,7 +126,8 @@ public class ExamService implements IExamService {
                 questions.getOpt3(),
                 questions.getOpt4(),
                 questions.getCategory(),
-                questions.getChapterId()
+                questions.getChapterId(),
+                questions.getCorrectOption()
         );
     }
 }
