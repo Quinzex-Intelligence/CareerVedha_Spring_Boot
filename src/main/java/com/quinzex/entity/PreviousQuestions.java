@@ -7,6 +7,7 @@ import lombok.Setter;
 
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Setter
@@ -37,7 +38,7 @@ public class PreviousQuestions {
     private LocalDateTime creationDate;
     @PrePersist
     public void prePersist() {
-        this.creationDate = LocalDateTime.now();
+        this.creationDate = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
     }
 
 }

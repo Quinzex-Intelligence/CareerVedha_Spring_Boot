@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "current_affairs")
@@ -41,7 +42,7 @@ public class CurrentAffairs {
 
     @PrePersist
     protected void onCreate() {
-        this.creationorupdationDate = LocalDateTime.now();
+        this.creationorupdationDate = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
 
     }
 }

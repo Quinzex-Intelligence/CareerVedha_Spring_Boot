@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -68,7 +69,7 @@ public class PostNotificationService implements IPostNotificationService {
 
 
         if(createdAt==null&& cursorId==null){
-            createdAt = LocalDateTime.now();
+            createdAt = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
             cursorId=Long.MAX_VALUE;
         }
     else if ((createdAt == null) != (cursorId == null)) {

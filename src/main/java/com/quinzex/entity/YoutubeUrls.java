@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Setter
@@ -25,6 +26,6 @@ public class YoutubeUrls {
 
     @PrePersist
     protected  void onCreate() {
-        createdAt = LocalDateTime.now();
+        createdAt = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
     }
 }

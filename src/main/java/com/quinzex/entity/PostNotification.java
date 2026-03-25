@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Setter
@@ -38,11 +39,11 @@ private LocalDateTime createdAt; //notification created date
 
 private String receiverRole;
 
-private Boolean seen;
+    private Boolean seen;
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
         this.seen = false;
     }
 }

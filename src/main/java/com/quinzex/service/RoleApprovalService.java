@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Set;
 
 @Service
@@ -49,7 +50,7 @@ public class RoleApprovalService implements IRoleApprovalService {
         lmsLoginRepo.save(user);
 
         notification.setNotificationStatus("APPROVED");
-        notification.setNotificationApprovedOrRejectedDate(LocalDateTime.now());
+        notification.setNotificationApprovedOrRejectedDate(LocalDateTime.now(ZoneId.of("Asia/Kolkata")));
         notification.setUserEmail(authentication.getName());
         roleNotificationRepo.save(notification);
         //email service
@@ -93,7 +94,7 @@ public class RoleApprovalService implements IRoleApprovalService {
 
         notification.setNotificationStatus("REJECTED");
 
-        notification.setNotificationApprovedOrRejectedDate(LocalDateTime.now());
+        notification.setNotificationApprovedOrRejectedDate(LocalDateTime.now(ZoneId.of("Asia/Kolkata")));
         notification.setUserEmail(authentication.getName());
         roleNotificationRepo.save(notification);
 

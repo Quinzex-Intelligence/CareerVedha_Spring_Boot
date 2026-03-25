@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 
@@ -112,7 +113,7 @@ Set<Long> alreadySeen = notificationSeenRepository.findAlreadySeenIds(loggedInUs
                     NotificationSeen notificationSeen = new NotificationSeen();
                     notificationSeen.setNotificationId(id);
                     notificationSeen.setUserId(loggedInUserID);
-                    notificationSeen.setSeenAt(LocalDateTime.now());
+                    notificationSeen.setSeenAt(LocalDateTime.now(ZoneId.of("Asia/Kolkata")));
                     return notificationSeen;
                 }).toList();
         notificationSeenRepository.saveAll(batch);

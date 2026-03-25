@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Getter
@@ -32,5 +33,5 @@ public class NotificationSeen {
     private Long userId;
 
     @Column(name = "seen_at", nullable = false)
-    private LocalDateTime seenAt = LocalDateTime.now();
+    private LocalDateTime seenAt = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
 }

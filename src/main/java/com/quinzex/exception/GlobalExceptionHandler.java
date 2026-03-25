@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -105,7 +106,7 @@ public class GlobalExceptionHandler {
                 status.name(),
                 message,
                 request.getRequestURI(),
-                LocalDateTime.now()
+                LocalDateTime.now(ZoneId.of("Asia/Kolkata"))
         );
 
         return ResponseEntity.status(status).body(error);
