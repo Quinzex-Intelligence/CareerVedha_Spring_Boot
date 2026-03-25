@@ -9,7 +9,7 @@ import java.util.List;
 
 @FeignClient(
         name = "academicsClient",
-        url = "https://www.quinzexintelligence.com"
+        url = "https://www.careervedha.com"
 )
 public interface AcademicsFeignClient {
 
