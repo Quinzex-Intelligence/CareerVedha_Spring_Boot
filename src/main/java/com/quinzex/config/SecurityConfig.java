@@ -36,7 +36,7 @@ public class SecurityConfig {
 @Bean
     public CorsConfigurationSource corsConfigurationSource() {
       CorsConfiguration configuration = new CorsConfiguration();
-      configuration.setAllowedOrigins(List.of("http://localhost:3000","https://www.quinzexintelligence.com","https://www.d2sg5wp92ge742.cloudfront.net","https://www.quinzexintelligence.com","http://api.quinzexintelligence.com","https://backend.quinzexintelligence.com","https://api.quinzexintelligence.com","careervedha.in","https://www.careervedha.in","https://www.careervedha.com"));
+      configuration.setAllowedOrigins(List.of("http://localhost:3000","https://www.quinzexintelligence.com","https://www.d2sg5wp92ge742.cloudfront.net","https://www.quinzexintelligence.com","http://api.quinzexintelligence.com","https://backend.quinzexintelligence.com","https://api.quinzexintelligence.com","careervedha.in","https://www.careervedha.in","https://www.careervedha.com","https://careervedha.com"));
       configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
       configuration.setAllowedHeaders(List.of("*"));
       configuration.setExposedHeaders(List.of( "Authorization","Set-Cookie"));
