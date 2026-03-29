@@ -42,19 +42,6 @@ public class JwtFilter extends OncePerRequestFilter {
            return;
        }
 
-       String path = request.getServletPath();
-
-       // 🔥 SKIP JWT for public endpoints
-       if (path.startsWith("/api/spring/login") ||
-               path.startsWith("/api/spring/register") ||
-               path.equals("/api/spring/registersendotp") ||
-               path.equals("/api/spring/login/send-otp") ||
-               path.startsWith("/actuator") ||
-               path.equals("/ads.txt")) {
-
-           filterChain.doFilter(request, response);
-           return;
-       }
 
        String authHeader = request.getHeader("Authorization");
       if(authHeader==null|| !authHeader.startsWith("Bearer ")){
