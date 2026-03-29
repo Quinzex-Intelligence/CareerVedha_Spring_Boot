@@ -38,7 +38,7 @@ public class SecurityConfig {
       CorsConfiguration configuration = new CorsConfiguration();
       configuration.setAllowedOrigins(List.of("https://www.careervedha.com","https://careervedha.com","https://api.careervedha.com"));
       configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-      configuration.setAllowedHeaders(List.of("*"));
+      configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
       configuration.setExposedHeaders(List.of( "Authorization","Set-Cookie"));
       configuration.setAllowCredentials(true);
 
