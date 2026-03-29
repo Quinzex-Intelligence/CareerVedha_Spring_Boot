@@ -13,7 +13,7 @@ FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-COPY --from=builder /build/target/*.jar app.jar
+COPY --from=builder /build/target/*.jar spring-app.jar
 
 ENV JAVA_OPTS="-Xms1g -Xmx2g"
 
