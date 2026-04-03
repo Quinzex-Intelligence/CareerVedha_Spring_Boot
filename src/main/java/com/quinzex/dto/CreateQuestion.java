@@ -11,6 +11,6 @@ public class CreateQuestion {
     private String option3;
     private String option4;
     private String correctAnswer;
-   private Long chapterId;
-   private String category;
+    private Long chapterId;
+    private String category;
 }
