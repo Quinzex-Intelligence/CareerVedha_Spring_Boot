@@ -52,7 +52,7 @@ jobs:
             -t $IMAGE_URI \
             --push .
 
-      # 6. Verify image
+      # 6. Verify image in ECR
       - name: Verify Image Exists in ECR
         run: |
           aws ecr describe-images \
@@ -96,7 +96,7 @@ jobs:
 
           echo "SSM Command ID: $COMMAND_ID"
 
-          # Poll status
+          # Poll SSM status
           for i in {1..20}; do
             STATUS=$(aws ssm list-command-invocations \
               --command-id $COMMAND_ID \
@@ -118,17 +118,22 @@ jobs:
             --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
             --output text
 
-      # 8. Health check
+      # 8. Health check 
       - name: Verify Deployment
         run: |
-          echo "Waiting for service..."
-          sleep 20
+          echo "Waiting for Spring Boot to start..."
 
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://<your-domain-or-ip>/actuator/health")
+          for i in {1..12}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health || true)
+            echo "Attempt $i: HTTP $STATUS"
 
-          echo "HTTP Status: $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Deployment successful"
+              exit 0
+            fi
 
-          if [ "$STATUS" != "200" ]; then
-            echo "Deployment failed"
-            exit 1
-          fi
+            sleep 5
+          done
+
+          echo "Deployment failed"
+          exit 1
