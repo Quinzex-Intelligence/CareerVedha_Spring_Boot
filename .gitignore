@@ -36,3 +36,4 @@ build/
 # Environment files
 .env
 .env.*
+src/main/resources/keys/private.pem

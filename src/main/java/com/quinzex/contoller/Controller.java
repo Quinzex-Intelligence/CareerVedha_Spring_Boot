@@ -123,7 +123,7 @@ public class Controller {
         );
     }
 
-    //@PostMapping("/refresh")
+    @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(
             @CookieValue("refreshToken") String refreshToken,
             HttpServletResponse response) {
@@ -144,13 +144,13 @@ public class Controller {
         );
     }
 
-   // @PostMapping("/login/send-otp")
-  //  public ResponseEntity<Map<String, Object>> sendLoginOtp(@RequestParam String email) {
-    //    iRegistrationLogin.sendLoginOtp(email);
-      //  return ResponseEntity.ok(
-        //        Map.of("message", "Login OTP sent", "email", email)
-        //);
-    //}
+    @PostMapping("/login/send-otp")
+    public ResponseEntity<Map<String, Object>> sendLoginOtp(@RequestParam String email) {
+        iRegistrationLogin.sendLoginOtp(email);
+        return ResponseEntity.ok(
+                Map.of("message", "Login OTP sent", "email", email)
+        );
+    }
 
 
 
