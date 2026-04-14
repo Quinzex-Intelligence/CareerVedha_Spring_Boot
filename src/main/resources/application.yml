@@ -1,6 +1,9 @@
 spring:
   application:
     name: ${SPRING_APPLICATION_NAME}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   data:
     redis:
       host: cvedha-prod-ecache-voss-01-orfbb1.serverless.aps2.cache.amazonaws.com
