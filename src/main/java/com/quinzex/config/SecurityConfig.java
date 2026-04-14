@@ -29,14 +29,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity security) throws  Exception{
         security.csrf(AbstractHttpConfigurer::disable).cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth->auth.requestMatchers("/api/spring/internal/academics/hierarchy","/api/spring/get-yt-urls-by-category","/actuator/**","/api/spring/get-exam-categories","/api/spring/registersendotp","/api/spring/questions-random-category","/api/spring/questions-random-chapterid","/api/spring/registeruser","/api/spring/login","/ads.txt","/api/spring/login/send-otp","/api/spring/refresh","/api/spring/log-out","/api/spring/contact", "/api/spring/get-papers/bycategory","/api/spring/get-questions","/api/spring/submit-exam", "/api/spring/current-affairs/by-region","/api/spring/get-all-affairs", "/ws/**").permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(auth->auth.requestMatchers("/api/spring/internal/academics/hierarchy","/api/spring/get-yt-urls-by-category","/actuator/**","/api/spring/get-exam-categories","/api/spring/registersendotp","/api/spring/questions-random-category","/api/spring/questions-random-chapterid","/api/spring/registeruser","/api/spring/login","/ads.txt","/api/spring/login/send-otp","/api/spring/refresh","/api/spring/log-out","/api/spring/contact", "/api/spring/get-papers/bycategory","/api/spring/get-questions","/api/spring/submit-exam", "/api/spring/current-affairs/by-region","/api/spring/get-all-affairs", "/ws/**","/api/spring/services/get/**").permitAll().anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable).formLogin(AbstractHttpConfigurer::disable).logout(AbstractHttpConfigurer::disable)    .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return security.build();
     }
 @Bean
     public CorsConfigurationSource corsConfigurationSource() {
       CorsConfiguration configuration = new CorsConfiguration();
-      configuration.setAllowedOrigins(List.of("https://www.careervedha.com","https://careervedha.com","https://api.careervedha.com"));
+      configuration.setAllowedOrigins(List.of("https://www.careervedha.com","https://careervedha.com","https://api.careervedha.com","http://localhost:3000"));
       configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
       configuration.setAllowedHeaders(List.of("*"));
       configuration.setExposedHeaders(List.of( "Authorization","Set-Cookie"));
