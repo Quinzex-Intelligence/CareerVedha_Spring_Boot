@@ -1,12 +1,11 @@
 package com.quinzex.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
-
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "our_services")
@@ -22,22 +21,22 @@ public class OurServices {
     @Column(length = 2000)
     private String description;
 
-    @Lob
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Instant createdAt;
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Instant updatedAt;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     @PrePersist
     public void prePersist() {
-        createdAt = Instant.now();
-        updatedAt = Instant.now();
+        createdAt = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+      updatedAt = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
     }
     @PreUpdate
     public void preUpdate() {
-        updatedAt = Instant.now();
+        updatedAt = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
     }
 }
