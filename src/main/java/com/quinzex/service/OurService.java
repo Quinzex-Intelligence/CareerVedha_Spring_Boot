@@ -8,9 +8,7 @@ import org.jsoup.nodes.Document;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,7 +22,6 @@ public class OurService implements IourSevice{
     private final S3PresignedUrlService s3PresignedUrlService;
     @Value("${aws.s3.bucket}")
     private String bucketName;
-    @CacheEvict(value = "servicesList", allEntries = true)
     @Transactional
     public OurServices  createOurService(OurServices ourService){
    validate(ourService);
@@ -32,8 +29,6 @@ public class OurService implements IourSevice{
 
     }
 
-   @CachePut(value = "services", key = "#result.id")
-    @CacheEvict(value = "servicesList", allEntries = true)
    @Transactional
     public OurServices updateService(Long id, OurServices ourService){
       OurServices existing =  ourServicesRepository.findById(id).orElseThrow(()->new RuntimeException("service not found"));
@@ -43,12 +38,12 @@ public class OurService implements IourSevice{
       existing.setContent(ourService.getContent());
       return  ourServicesRepository.save(existing);
     }
-    @CacheEvict(value = {"services", "servicesList"}, allEntries = true)
+
     @Transactional
     public void deleteService(Long id) {
         ourServicesRepository.deleteById(id);
     }
-    @Cacheable(value = "servicesList", key = "#cursor + '_' + #size")
+
     public List<OurServices> findServicesWithCursor(Long cursor,int size) {
         Pageable  pageable = PageRequest.of(0, size);
        List<OurServices> services;
@@ -76,7 +71,7 @@ public class OurService implements IourSevice{
             throw new IllegalArgumentException("content is required");
         }
     }
-    @Cacheable(value = "services", key = "#id", unless = "#result == null")
+
     @Transactional
     public OurServices getServiceById(Long id){
         OurServices service = ourServicesRepository.findById(id)
