@@ -1,6 +1,7 @@
 package com.quinzex.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -25,7 +26,9 @@ public class OurServices {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant createdAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant updatedAt;
 
     @PrePersist
