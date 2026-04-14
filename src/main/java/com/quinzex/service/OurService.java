@@ -43,13 +43,12 @@ public class OurService implements IourSevice{
       existing.setContent(ourService.getContent());
       return  ourServicesRepository.save(existing);
     }
-    @CacheEvict(value = {"services", "servicesList"}, key = "#id", allEntries = true)
+    @CacheEvict(value = {"services", "servicesList"}, allEntries = true)
     @Transactional
     public void deleteService(Long id) {
         ourServicesRepository.deleteById(id);
     }
-   @Cacheable(value = "servicesList")
-   @Transactional
+    @Cacheable(value = "servicesList", key = "#cursor + '_' + #size")
     public List<OurServices> findServicesWithCursor(Long cursor,int size) {
         Pageable  pageable = PageRequest.of(0, size);
        List<OurServices> services;
