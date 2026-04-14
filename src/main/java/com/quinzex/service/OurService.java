@@ -2,6 +2,7 @@ package com.quinzex.service;
 
 import com.quinzex.entity.OurServices;
 import com.quinzex.repository.OurServicesRepository;
+import jakarta.transaction.Transactional;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class OurService implements IourSevice{
     @Value("${aws.s3.bucket}")
     private String bucketName;
     @CacheEvict(value = "servicesList", allEntries = true)
+    @Transactional
     public OurServices  createOurService(OurServices ourService){
    validate(ourService);
   return ourServicesRepository.save(ourService);
@@ -32,6 +34,7 @@ public class OurService implements IourSevice{
 
    @CachePut(value = "services", key = "#result.id")
     @CacheEvict(value = "servicesList", allEntries = true)
+   @Transactional
     public OurServices updateService(Long id, OurServices ourService){
       OurServices existing =  ourServicesRepository.findById(id).orElseThrow(()->new RuntimeException("service not found"));
       validate(ourService);
@@ -41,10 +44,12 @@ public class OurService implements IourSevice{
       return  ourServicesRepository.save(existing);
     }
     @CacheEvict(value = {"services", "servicesList"}, key = "#id", allEntries = true)
+    @Transactional
     public void deleteService(Long id) {
         ourServicesRepository.deleteById(id);
     }
    @Cacheable(value = "servicesList")
+   @Transactional
     public List<OurServices> findServicesWithCursor(Long cursor,int size) {
         Pageable  pageable = PageRequest.of(0, size);
        List<OurServices> services;
@@ -73,6 +78,7 @@ public class OurService implements IourSevice{
         }
     }
     @Cacheable(value = "services", key = "#id", unless = "#result == null")
+    @Transactional
     public OurServices getServiceById(Long id){
         OurServices service = ourServicesRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Service not found"));
