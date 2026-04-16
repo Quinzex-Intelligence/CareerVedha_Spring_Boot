@@ -5,6 +5,7 @@ import com.quinzex.service.IourSevice;
 import com.quinzex.service.OurService;
 import com.quinzex.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,12 +48,14 @@ public class OurServiceController {
         return ourService.findServicesWithCursor(cursor, size);
     }
     @PostMapping("/upload")
+    @PreAuthorize("hasAuthority('SERVICES')")
     public String uploadImage(@RequestParam("file") MultipartFile file) throws Exception {
         return s3UploadService.uploadFile(file, "services");
     }
 
     // DELETE IMAGE FROM S3
     @DeleteMapping("/file")
+    @PreAuthorize("hasAuthority('SERVICES')")
     public String deleteImage(@RequestParam("key") String key) throws Exception {
         s3UploadService.deleteFile(key);
         return "Image deleted successfully";
