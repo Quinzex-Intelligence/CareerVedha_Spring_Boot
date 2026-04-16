@@ -4,6 +4,10 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   data:
     redis:
       host: cvedha-prod-ecache-voss-01-orfbb1.serverless.aps2.cache.amazonaws.com
