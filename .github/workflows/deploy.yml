@@ -117,3 +117,5 @@ jobs:
             --command-id $COMMAND_ID \
             --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
             --output text
+
+######End of the Pipeline#######
