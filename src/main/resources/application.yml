@@ -68,7 +68,7 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
       mail.smtp.starttls.required: true
-      mail.smtp.ssl.trust: smtp.gmail.com
+      mail.smtp.ssl.trust: smtpout.secureserver.net
 
 admin:
   email: ${ADMIN_EMAIL}
