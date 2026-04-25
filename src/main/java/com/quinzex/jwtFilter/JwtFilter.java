@@ -109,23 +109,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
    } catch (Exception e) {
        SecurityContextHolder.clearContext();
-
        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-       response.setContentType("application/json");
-
-       StringBuilder errorResponse = new StringBuilder();
-       errorResponse.append("{");
-       errorResponse.append("\"message\":\"").append(e.getMessage()).append("\",");
-       errorResponse.append("\"stackTrace\":\"");
-
-       for (StackTraceElement element : e.getStackTrace()) {
-           errorResponse.append(element.toString()).append("\\n");
-       }
-
-       errorResponse.append("\"}");
-
-       response.getWriter().write(errorResponse.toString());
-
        return;
    }
        filterChain.doFilter(request,response);
