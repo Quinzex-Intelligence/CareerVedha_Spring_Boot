@@ -24,6 +24,7 @@ public class LmsLogin {
     private String lastName;
 
     @Column(nullable = false)
+    @Version
     private int tokenVersion = 0;
 
     @ManyToOne(fetch = FetchType.EAGER,optional = false)

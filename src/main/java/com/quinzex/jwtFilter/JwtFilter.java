@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,17 +21,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 ;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private LmsLoginRepo loginRepo;
+    private final RedisTemplate<String,Object> redisTemplate;
 
-    private final LmsLoginRepo loginRepo;
-
-   public JwtFilter(JwtService jwtService,LmsLoginRepo  loginRepo){
+   public JwtFilter(JwtService jwtService, RedisTemplate<String,Object> redisTemplate, LmsLoginRepo loginRepo) {
        this.jwtService = jwtService;
+       this.redisTemplate =redisTemplate;
        this.loginRepo = loginRepo;
    }
 
@@ -66,12 +69,19 @@ public class JwtFilter extends OncePerRequestFilter {
        Integer tokenVersion = claims.get("tokenVersion", Integer.class);
        Integer roleVersion  = claims.get("roleVersion", Integer.class);
 
-       LmsLogin user = loginRepo.findByEmail(email).orElseThrow(()->new RuntimeException("user not found"));
+       String cacheKey = "user:" + email;
+       LmsLogin user = (LmsLogin) redisTemplate.opsForValue().get(cacheKey);
+       if (user == null) {
+           user = loginRepo.findByEmail(email)
+                   .orElseThrow(() -> new RuntimeException("Unauthorized"));
+
+           redisTemplate.opsForValue().set(cacheKey, user, 10, TimeUnit.MINUTES);
+       }
        if(!tokenVersion.equals(user.getTokenVersion())){
-         throw new RuntimeException("Invalid token , unauthorized user detected");
+           throw new RuntimeException("Unauthorized");
        }
        if(!roleVersion.equals(user.getRole().getRoleVersion())){
-           throw new RuntimeException("Denied Access , unauthorized user detected");
+           throw new RuntimeException("Unauthorized");
        }
 
        if (!claims.containsKey("permissions")) {

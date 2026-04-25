@@ -223,7 +223,11 @@ public class RegistrationLogin implements IRegistrationLogin {
     @Override
     public String Logout(String RefreshToken, HttpServletResponse response) {
            if (StringUtils.hasText(RefreshToken)) {
+               RefreshTokenData data = irefreshTokenService.validate(RefreshToken);
+               String email = data.getEmail();
+               loginRepo.incrementTokenVersion(email);
                irefreshTokenService.revoke(RefreshToken);
+               redisTemplate.delete("user:" + email);
            }
 
            ResponseCookie cookie = ResponseCookie.from("refreshToken","")
