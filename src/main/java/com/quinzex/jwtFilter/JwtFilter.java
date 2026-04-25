@@ -1,5 +1,6 @@
 package com.quinzex.jwtFilter;
 
+import com.quinzex.dto.UserCacheDTO;
 import com.quinzex.entity.LmsLogin;
 import com.quinzex.repository.LmsLoginRepo;
 import com.quinzex.service.JwtService;
@@ -28,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private LmsLoginRepo loginRepo;
+    private final LmsLoginRepo loginRepo;
     private final RedisTemplate<String,Object> redisTemplate;
 
    public JwtFilter(JwtService jwtService, RedisTemplate<String,Object> redisTemplate, LmsLoginRepo loginRepo) {
@@ -70,17 +71,23 @@ public class JwtFilter extends OncePerRequestFilter {
        Integer roleVersion  = claims.get("roleVersion", Integer.class);
 
        String cacheKey = "user:" + email;
-       LmsLogin user = (LmsLogin) redisTemplate.opsForValue().get(cacheKey);
-       if (user == null) {
-           user = loginRepo.findByEmail(email)
+       UserCacheDTO dto = (UserCacheDTO) redisTemplate.opsForValue().get(cacheKey);
+       if (dto == null) {
+           LmsLogin user = loginRepo.findByEmail(email)
                    .orElseThrow(() -> new RuntimeException("Unauthorized"));
 
-           redisTemplate.opsForValue().set(cacheKey, user, 10, TimeUnit.MINUTES);
+           dto = new UserCacheDTO(
+                   user.getEmail(),
+                   user.getTokenVersion(),
+                   user.getRole().getRoleVersion()
+           );
+
+           redisTemplate.opsForValue().set(cacheKey, dto, 10, TimeUnit.MINUTES);
        }
-       if(!tokenVersion.equals(user.getTokenVersion())){
+       if(!tokenVersion.equals(dto.getTokenVersion())){
            throw new RuntimeException("Unauthorized");
        }
-       if(!roleVersion.equals(user.getRole().getRoleVersion())){
+       if(!roleVersion.equals(dto.getRoleVersion())){
            throw new RuntimeException("Unauthorized");
        }
 
