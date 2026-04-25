@@ -135,10 +135,11 @@ public class Controller {
 
     @PostMapping("/log-out")
     public ResponseEntity<Map<String, Object>> logout(
-            @CookieValue(value = "refreshToken", required = false) String refreshToken,
+            @RequestHeader("Authorization") String authHeader,
             HttpServletResponse response) {
 
-        iRegistrationLogin.Logout(refreshToken, response);
+        iRegistrationLogin.Logout(authHeader, response);
+
         return ResponseEntity.ok(
                 Map.of("message", "Logged out successfully")
         );

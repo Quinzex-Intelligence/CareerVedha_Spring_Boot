@@ -6,6 +6,8 @@ import com.quinzex.entity.Permission;
 import com.quinzex.entity.Roles;
 import com.quinzex.repository.LmsLoginRepo;
 import com.quinzex.repository.RolesRepo;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -221,14 +223,15 @@ public class RegistrationLogin implements IRegistrationLogin {
     }
 
     @Override
-    public String Logout(String RefreshToken, HttpServletResponse response) {
-           if (StringUtils.hasText(RefreshToken)) {
-               RefreshTokenData data = irefreshTokenService.validate(RefreshToken);
-               String email = data.getEmail();
-               loginRepo.incrementTokenVersion(email);
-               irefreshTokenService.revoke(RefreshToken);
-               redisTemplate.delete("user:" + email);
+    public String Logout(String authHeader, HttpServletResponse response) {
+           if(authHeader==null|| !authHeader.startsWith("Bearer ")){
+               throw new RuntimeException("Invalid token");
            }
+           String token = authHeader.substring(7);
+        Claims claims = jwtService.parseToken(token);
+        String email = claims.getSubject();
+        loginRepo.incrementTokenVersion(email);
+        redisTemplate.delete("user:"+email);
 
            ResponseCookie cookie = ResponseCookie.from("refreshToken","")
                    .httpOnly(true)
