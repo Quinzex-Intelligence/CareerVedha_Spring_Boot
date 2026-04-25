@@ -712,5 +712,8 @@ public class Controller {
     public String updateYoutubeUrls(@RequestBody YoutubeUrls youtubeUrls) {
         return youtubeService.updateYoutubeUrls(youtubeUrls);
     }
-
+    @GetMapping("/welcome/{name}")
+    public String welcome(@PathVariable String name) {
+        return "Welcome " + name;
+    }
 }
