@@ -1,6 +1,5 @@
 package com.quinzex.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quinzex.dto.RefreshTokenData;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 public class RefreshTokenService implements IrefreshTokenService {
     private static final long REFRESH_EXP_MS = 7 * 24 * 60 * 60 * 1000;
     private final RedisTemplate<String,Object> redisTemplate;
-    private final  ObjectMapper mapper = new ObjectMapper();
     public RefreshTokenService(RedisTemplate<String,Object> redisTemplate){
         this.redisTemplate = redisTemplate;
     }
@@ -27,8 +25,9 @@ public class RefreshTokenService implements IrefreshTokenService {
             String refreshToken = UUID.randomUUID().toString();
             RefreshTokenData data = new RefreshTokenData(email,tokenVersion);
 
-            String json = mapper.writeValueAsString(data);
-            redisTemplate.opsForValue().set(key(refreshToken),json,REFRESH_EXP_MS, TimeUnit.MILLISECONDS);
+
+            redisTemplate.opsForValue().set(key(refreshToken),data,REFRESH_EXP_MS, TimeUnit.MILLISECONDS);
+
             return refreshToken;
         }catch (Exception e){
             throw new RuntimeException("Failed to create refresh token", e);
@@ -39,13 +38,13 @@ public class RefreshTokenService implements IrefreshTokenService {
     @Override
     public RefreshTokenData validate(String refreshToken) {
         try {
-            Object value = redisTemplate.opsForValue().get(key(refreshToken));
-            if (value == null) {
+            RefreshTokenData data = (RefreshTokenData) redisTemplate.opsForValue().get(key(refreshToken));
+
+            if (data == null) {
                 throw new RuntimeException("Invalid or expired refresh token");
             }
 
-            String json = value.toString();
-            return mapper.readValue(json, RefreshTokenData.class);
+            return  data;
 
         } catch (Exception e) {
             throw new RuntimeException("Invalid refresh token", e);
