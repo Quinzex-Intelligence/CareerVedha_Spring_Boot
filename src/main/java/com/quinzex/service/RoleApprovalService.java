@@ -86,11 +86,7 @@ public class RoleApprovalService implements IRoleApprovalService {
 
 
 
-        user.setIsAuthorized(false);
-        user.setStatus("REJECTED");
-        user.setTokenVersion(user.getTokenVersion() + 1);
 
-        lmsLoginRepo.save(user);
 
         notification.setNotificationStatus("REJECTED");
 
@@ -100,6 +96,7 @@ public class RoleApprovalService implements IRoleApprovalService {
 
         //email service
         iemailService.sendRejectionEmail(notification.getEmail(), user.getRole().getRoleName(),  reason);
+        lmsLoginRepo.delete(user);
         return notification.getEmail()+" rejected successfully";
 
     }
