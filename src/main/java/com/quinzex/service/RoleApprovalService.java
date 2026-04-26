@@ -42,17 +42,21 @@ public class RoleApprovalService implements IRoleApprovalService {
             throw new RuntimeException("You are not authorized");
         }
 
-
+        if (!"PENDING".equals(notification.getNotificationStatus())) {
+            throw new RuntimeException("Already processed");
+        }
 
         user.setIsAuthorized(true);
         user.setStatus("APPROVED");
         user.setTokenVersion(user.getTokenVersion()+1);
         lmsLoginRepo.save(user);
-
-        notification.setNotificationStatus("APPROVED");
-        notification.setNotificationApprovedOrRejectedDate(LocalDateTime.now(ZoneId.of("Asia/Kolkata")));
-        notification.setUserEmail(authentication.getName());
-        roleNotificationRepo.save(notification);
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+        roleNotificationRepo.updateAllByEmail(
+                user.getEmail(),
+                "APPROVED",
+                now,
+                authentication.getName()
+        );
         //email service
         iemailService.sendApprovalEmail(notification.getEmail(),user.getRole().getRoleName());
         return notification.getEmail()+" is approved successfully";
@@ -81,18 +85,21 @@ public class RoleApprovalService implements IRoleApprovalService {
         if (!Set.of("ADMIN", "SUPER_ADMIN").contains(approverRole)) {
             throw new RuntimeException("You are not authorized");
         }
+        if (!"PENDING".equals(notification.getNotificationStatus())) {
+            throw new RuntimeException("Already processed");
+        }
 
 
 
 
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
 
-
-
-        notification.setNotificationStatus("REJECTED");
-
-        notification.setNotificationApprovedOrRejectedDate(LocalDateTime.now(ZoneId.of("Asia/Kolkata")));
-        notification.setUserEmail(authentication.getName());
-        roleNotificationRepo.save(notification);
+        roleNotificationRepo.updateAllByEmail(
+                user.getEmail(),
+                "REJECTED",
+                 now,
+                authentication.getName()
+        );
 
         //email service
         iemailService.sendRejectionEmail(notification.getEmail(), user.getRole().getRoleName(),  reason);

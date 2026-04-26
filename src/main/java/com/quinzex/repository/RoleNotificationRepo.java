@@ -155,6 +155,14 @@ ORDER BY rn.localDateTime DESC, rn.id DESC
             @Param("userId") Long userId,
             Pageable pageable
     );
-
+    @Modifying
+    @Query("""
+UPDATE RoleNotification r 
+SET r.notificationStatus = :status,
+    r.notificationApprovedOrRejectedDate = :date,
+    r.userEmail = :approvedBy
+WHERE r.email = :email
+""")
+    void updateAllByEmail(String email, String status, LocalDateTime date, String approvedBy);
 
 }
