@@ -21,6 +21,7 @@ public class CaptchaService {
             return false;
         }
         Map<String,Object> response = captchaClient.verifyCaptcha(secretKey,captchaResponse);
+        System.out.println("GOOGLE RESPONSE: " + response);
         return (Boolean)response.get("success");
     }
 }
