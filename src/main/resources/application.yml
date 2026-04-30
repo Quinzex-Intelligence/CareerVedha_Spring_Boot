@@ -97,3 +97,6 @@ aws:
 security:
   s3:
     secret: ${SECURITY_S3_SECRET}
+
+recaptcha:
+  secret-key: 6Lc169EsAAAAAGSB_oIax5YqNgcqeBFUssdXaIzo

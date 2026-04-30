@@ -41,10 +41,12 @@ public class RegistrationLogin implements IRegistrationLogin {
 
     private final IRoleNotificationProducer roleNotificationProducer;
 
+    private final CaptchaService captchaService;
+
     private static final int MAX_ATTEMPTS = 3;
 
 
-    public RegistrationLogin(LmsLoginRepo loginRepo, RolesRepo rolesRepo, IotpService iotpService, JwtService jwtService , IrefreshTokenService irefreshTokenService,RedisTemplate<String,Object> redisTemplate,IemailService iemailService,IRoleNotificationProducer roleNotificationProducer  ) {
+    public RegistrationLogin(LmsLoginRepo loginRepo, RolesRepo rolesRepo, IotpService iotpService, JwtService jwtService , IrefreshTokenService irefreshTokenService,RedisTemplate<String,Object> redisTemplate,IemailService iemailService,IRoleNotificationProducer roleNotificationProducer ,CaptchaService captchaService ) {
         this.loginRepo = loginRepo;
         this.rolesRepo = rolesRepo;
         this.iotpService = iotpService;
@@ -53,6 +55,7 @@ public class RegistrationLogin implements IRegistrationLogin {
         this.redisTemplate = redisTemplate;
         this.iemailService=iemailService;
         this.roleNotificationProducer = roleNotificationProducer;
+        this.captchaService = captchaService;
     }
 
     @Override
@@ -124,12 +127,19 @@ public class RegistrationLogin implements IRegistrationLogin {
     }
     @Override
     public LoginResponse login(LoginRequest loginResponse, HttpServletResponse response) {
+        if (loginResponse.getCaptchaToken() == null || loginResponse.getCaptchaToken().isEmpty()) {
+            throw new RuntimeException("Captcha required ");
+        }
+        if (!captchaService.verifyCaptcha(loginResponse.getCaptchaToken())) {
+            throw new RuntimeException("Captcha verification failed ");
+        }
         LmsLogin user = loginRepo
                 .findByEmailWithRoleAndPermissions(loginResponse.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if(!Boolean.TRUE.equals(user.getRole().getRoleStatus())){
             throw new RuntimeException("Your roles status is inactive please try again");
         }
+
         boolean validateOtp = iotpService.validateLoginOtp(loginResponse.getEmail(), loginResponse.getOtp());
         if (!validateOtp) {
             Long attempts = redisTemplate.opsForValue().increment("otp-fail:"+loginResponse.getEmail());
