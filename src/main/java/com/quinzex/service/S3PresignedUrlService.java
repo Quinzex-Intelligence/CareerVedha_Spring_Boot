@@ -8,6 +8,9 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 
 import java.time.Duration;
 
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+
 @Service
 @RequiredArgsConstructor
 public class S3PresignedUrlService {
@@ -24,6 +27,19 @@ public String generateViewUrl(String bucketName,String s3Key) {
             .getObjectRequest(getObjectRequest).build();
 
     return s3Presigner.presignGetObject(getObjectPresignRequest).url().toString();
+}
+
+public String generateUploadUrl(String bucketName, String s3Key, String contentType) {
+    PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+            .bucket(bucketName)
+            .key(s3Key)
+            .contentType(contentType)
+            .build();
+    PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+            .signatureDuration(Duration.ofMinutes(10))
+            .putObjectRequest(putObjectRequest).build();
+
+    return s3Presigner.presignPutObject(presignRequest).url().toString();
 }
 
 }

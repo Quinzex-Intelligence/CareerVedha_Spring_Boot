@@ -76,4 +76,11 @@ private final S3PresignedUrlService s3PresignedUrlService;
 
         return new UploadResponse(key, url);
     }
+
+    public UploadResponse generatePresignedUploadUrl(String filename, String contentType, String folder) {
+        String safeName = (filename != null && !filename.isEmpty()) ? filename : "file";
+        String s3Key = folder + "/" + UUID.randomUUID() + "-" + safeName;
+        String uploadUrl = s3PresignedUrlService.generateUploadUrl(bucketName, s3Key, contentType);
+        return new UploadResponse(s3Key, uploadUrl);
+    }
 }

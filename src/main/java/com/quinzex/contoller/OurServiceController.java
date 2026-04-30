@@ -57,6 +57,12 @@ public class OurServiceController {
         return s3UploadService.uploadAndGenerateUrl(file, "services");
     }
 
+    @GetMapping("/upload-presigned")
+    @PreAuthorize("hasAuthority('SERVICES')")
+    public UploadResponse getPresignedUploadUrl(@RequestParam("filename") String filename, @RequestParam("contentType") String contentType) {
+        return s3UploadService.generatePresignedUploadUrl(filename, contentType, "services");
+    }
+
     // DELETE IMAGE FROM S3
     @DeleteMapping("/file")
     @PreAuthorize("hasAuthority('SERVICES')")
