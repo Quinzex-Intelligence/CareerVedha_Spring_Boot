@@ -1,5 +1,6 @@
 package com.quinzex.service;
 
+import com.quinzex.dto.UploadResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class S3UploadService {
     private final S3Client s3Client;
-
+private final S3PresignedUrlService s3PresignedUrlService;
     @Value("${aws.s3.bucket}")
     private String bucketName;
 
@@ -54,5 +55,25 @@ public class S3UploadService {
                 .key(s3Key)
                 .build();
         s3Client.deleteObject(deleteObjectRequest);
+    }
+    public String uploadFileAndGetUrl(MultipartFile file,String folder) throws IOException {
+        if(file.isEmpty()){
+            throw new IllegalArgumentException("file is empty");
+        }
+        String originalName=file.getOriginalFilename();
+        String safeName =(originalName!=null)?originalName:"file";
+        String s3Key = folder+"/"+ UUID.randomUUID()+"-" +safeName;
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucketName).key(s3Key).contentType(file.getContentType()).build();
+        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+        return s3Key;
+    }
+
+    public UploadResponse uploadAndGenerateUrl(MultipartFile file, String folder) throws IOException {
+
+        String key = uploadFileAndGetUrl(file, folder);
+
+        String url = s3PresignedUrlService.generateViewUrl(bucketName, key);
+
+        return new UploadResponse(key, url);
     }
 }

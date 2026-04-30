@@ -12,14 +12,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
+import software.amazon.awssdk.services.s3.S3Client;
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
 public class OurService implements IourSevice{
     private final OurServicesRepository ourServicesRepository;
     private final S3PresignedUrlService s3PresignedUrlService;
+    private final S3Client s3Client;
     @Value("${aws.s3.bucket}")
     private String bucketName;
     @Transactional

@@ -1,8 +1,10 @@
 package com.quinzex.contoller;
 
+import com.quinzex.dto.UploadResponse;
 import com.quinzex.entity.OurServices;
 import com.quinzex.service.IourSevice;
 import com.quinzex.service.OurService;
+import com.quinzex.service.S3PresignedUrlService;
 import com.quinzex.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +20,7 @@ public class OurServiceController {
 
     private final IourSevice ourService;
     private final S3UploadService s3UploadService;
+    private final S3PresignedUrlService presignedUrlService;
 
     // CREATE
     @PostMapping("/create-service")
@@ -49,8 +52,9 @@ public class OurServiceController {
     }
     @PostMapping("/upload")
     @PreAuthorize("hasAuthority('SERVICES')")
-    public String uploadImage(@RequestParam("file") MultipartFile file) throws Exception {
-        return s3UploadService.uploadFile(file, "services");
+    public UploadResponse uploadImage(@RequestParam("file") MultipartFile file) throws Exception {
+
+        return s3UploadService.uploadAndGenerateUrl(file, "services");
     }
 
     // DELETE IMAGE FROM S3
