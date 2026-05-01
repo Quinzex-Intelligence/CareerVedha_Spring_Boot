@@ -29,17 +29,6 @@ public String generateViewUrl(String bucketName,String s3Key) {
     return s3Presigner.presignGetObject(getObjectPresignRequest).url().toString();
 }
 
-public String generateUploadUrl(String bucketName, String s3Key, String contentType) {
-    PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-            .bucket(bucketName)
-            .key(s3Key)
-            .contentType(contentType)
-            .build();
-    PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(2)) // Reduced to 2 minutes for tighter security
-            .putObjectRequest(putObjectRequest).build();
 
-    return s3Presigner.presignPutObject(presignRequest).url().toString();
-}
 
 }

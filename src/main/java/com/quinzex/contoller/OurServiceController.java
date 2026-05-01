@@ -1,16 +1,16 @@
 package com.quinzex.contoller;
 
-import com.quinzex.dto.UploadResponse;
 import com.quinzex.entity.OurServices;
 import com.quinzex.service.IourSevice;
-import com.quinzex.service.OurService;
 import com.quinzex.service.S3PresignedUrlService;
 import com.quinzex.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -51,21 +51,29 @@ public class OurServiceController {
         return ourService.findServicesWithCursor(cursor, size);
     }
     @PostMapping("/upload")
-    @PreAuthorize("hasAuthority('SERVICES')")
-    public UploadResponse uploadImage(@RequestParam("file") MultipartFile file) throws Exception {
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    public ResponseEntity<String> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("folder") String folder) throws IOException {
 
-        return s3UploadService.uploadAndGenerateUrl(file, "services");
+        String s3Key = s3UploadService.uploadFile(file, folder);
+        return ResponseEntity.ok(s3Key);
+    }
+    @PutMapping("/update")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    public ResponseEntity<String> updateFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("key") String s3Key) throws IOException {
+
+        s3UploadService.updateFile(s3Key, file);
+        return ResponseEntity.ok("File updated successfully");
     }
 
-    @GetMapping("/upload-presigned")
-    @PreAuthorize("hasAuthority('SERVICES')")
-    public UploadResponse getPresignedUploadUrl(@RequestParam("filename") String filename, @RequestParam("contentType") String contentType) {
-        return s3UploadService.generatePresignedUploadUrl(filename, contentType, "services");
-    }
+
 
     // DELETE IMAGE FROM S3
     @DeleteMapping("/file")
-    @PreAuthorize("hasAuthority('SERVICES')")
+    @PreAuthorize("hasAuthority('SERVICES') or hasRole('SUPER_ADMIN')")
     public String deleteImage(@RequestParam("key") String key) throws Exception {
         s3UploadService.deleteFile(key);
         return "Image deleted successfully";
