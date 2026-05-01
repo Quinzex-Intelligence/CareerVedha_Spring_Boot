@@ -1,5 +1,6 @@
 package com.quinzex.entity;
 
+import com.quinzex.enums.Language;
 import com.quinzex.enums.YoutubeCategory;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -21,6 +22,8 @@ public class YoutubeUrls {
     private String title;
     @Enumerated(EnumType.STRING)
     private YoutubeCategory category;
+    @Enumerated(EnumType.STRING)
+    private Language language;
     @Column(nullable = false,updatable = false)
     private LocalDateTime createdAt;
 

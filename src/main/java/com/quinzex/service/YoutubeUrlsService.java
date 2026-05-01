@@ -2,6 +2,7 @@ package com.quinzex.service;
 
 
 import com.quinzex.entity.YoutubeUrls;
+import com.quinzex.enums.Language;
 import com.quinzex.enums.YoutubeCategory;
 import com.quinzex.repository.IYoutubeUrls;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,11 @@ public class YoutubeUrlsService implements IYoutubeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<YoutubeUrls> getYoutubeUrls(YoutubeCategory youtubeCategory, Long cursorId) {
+    public List<YoutubeUrls> getYoutubeUrls(YoutubeCategory youtubeCategory,  Language language,Long cursorId) {
      if(cursorId == null){
-         return iYoutubeUrlsRepo.findTop10ByCategoryOrderByIdDesc(youtubeCategory);
+         return iYoutubeUrlsRepo.findTop10ByCategoryAndLanguageOrderByIdDesc(youtubeCategory,language);
      }
-     return iYoutubeUrlsRepo.findTop10ByCategoryAndIdLessThanOrderByIdDesc(youtubeCategory,cursorId);
+     return iYoutubeUrlsRepo.findTop10ByCategoryAndLanguageAndIdLessThanOrderByIdDesc(youtubeCategory,language,cursorId);
     }
 
     @Override
@@ -44,6 +45,7 @@ public class YoutubeUrlsService implements IYoutubeService {
         YoutubeUrls existing = iYoutubeUrlsRepo.findById(youtubeUrls.getId()).orElseThrow(()->new RuntimeException(youtubeUrls.getId()+" not found"));
         existing.setUrl(youtubeUrls.getUrl());
         existing.setCategory(youtubeUrls.getCategory());
+        existing.setLanguage(youtubeUrls.getLanguage());
         existing.setTitle(youtubeUrls.getTitle());
 
         return "Youtube Videos updated successfully";

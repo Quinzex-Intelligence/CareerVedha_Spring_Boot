@@ -36,7 +36,7 @@ public String generateUploadUrl(String bucketName, String s3Key, String contentT
             .contentType(contentType)
             .build();
     PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(10))
+            .signatureDuration(Duration.ofMinutes(2)) // Reduced to 2 minutes for tighter security
             .putObjectRequest(putObjectRequest).build();
 
     return s3Presigner.presignPutObject(presignRequest).url().toString();
