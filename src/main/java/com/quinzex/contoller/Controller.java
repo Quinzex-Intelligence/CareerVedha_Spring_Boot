@@ -701,9 +701,10 @@ public class Controller {
     @GetMapping("/get-yt-urls-by-category")
     public List<YoutubeUrls> getYoutubeUrls(
             @RequestParam YoutubeCategory category,
+            @RequestParam Language language,
             @RequestParam(required = false) Long cursorId
     ) {
-        return youtubeService.getYoutubeUrls(category, cursorId);
+        return youtubeService.getYoutubeUrls(category,language, cursorId);
     }
     @DeleteMapping("/delete-yt-urls")
     public String deleteYoutubeUrls(@RequestBody List<Long> ids) {
