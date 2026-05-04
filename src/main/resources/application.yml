@@ -92,7 +92,7 @@ jwt:
 aws:
   region: ap-south-2
   s3:
-    bucket: careervidya1
+    bucket: cvedha-prod-spring-uploads-s3-01
 
 security:
   s3:
